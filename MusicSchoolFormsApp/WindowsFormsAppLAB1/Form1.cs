@@ -8,54 +8,86 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Configuration;
 
 namespace WindowsFormsAppLAB1
 {
     public partial class Form1 : Form
     {
         SqlConnection dbConn;
-        SqlDataAdapter daStudents, daGrades;
+        SqlDataAdapter daParent, daChild;
         SqlCommandBuilder cb;
         DataSet ds;
-        BindingSource bsStudents, bsGrades;
+        BindingSource bsParent, bsChild;
+
+        string parentTable, childTable, relationName;
         public Form1()
         {
             InitializeComponent();
         }
 
+        private void btnReloadData_Click(object sender, EventArgs e)
+        {
+            ds.Clear();
+            daParent.Fill(ds, parentTable);
+            daChild.Fill(ds, childTable);
+        }
+
+
         private void btnSaveData_Click(object sender, EventArgs e)
         {
-            daGrades.Update(ds, "Grades");
+            daChild.Update(ds, childTable);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            dbConn = new SqlConnection("Server = EMTREILA-PC\\SQLEXPRESS ; dATABASE = MusicSchool; Integrated Security = true");
 
+            string connStr = ConfigurationManager.AppSettings["ConnectionString"];
+            string formCaption = ConfigurationManager.AppSettings["FormCaption"];
+
+            parentTable = ConfigurationManager.AppSettings["ParentTable"];
+            string parentQuery = ConfigurationManager.AppSettings["ParentQuery"];
+            string parentLabel = ConfigurationManager.AppSettings["ParentLabel"];
+            string parentKey = ConfigurationManager.AppSettings["ParentKey"];
+
+            childTable = ConfigurationManager.AppSettings["ChildTable"];
+            string childQuery = ConfigurationManager.AppSettings["ChildQuery"];
+            string childLabel = ConfigurationManager.AppSettings["ChildLabel"];
+            string childKey = ConfigurationManager.AppSettings["ChildKey"];
+
+            relationName = ConfigurationManager.AppSettings["RelationName"];
+
+            this.Text = formCaption;
+            this.parentLabel.Text = parentLabel;
+            this.childLabel.Text = childLabel;
+
+            dbConn = new SqlConnection(connStr);
             ds = new DataSet();
 
-            daStudents = new SqlDataAdapter("SELECT * FROM Students", dbConn);
-            daGrades = new SqlDataAdapter("SELECT * FROM Grades", dbConn);
-            cb = new SqlCommandBuilder(daGrades);
+            daParent = new SqlDataAdapter(parentQuery, dbConn);
+            daChild = new SqlDataAdapter(childQuery, dbConn);
+            
+            cb = new SqlCommandBuilder(daChild);
 
-            daStudents.Fill(ds, "Students");
-            daGrades.Fill(ds, "Grades");
+            daParent.Fill(ds, parentTable);
+            daChild.Fill(ds, childTable);
 
-            DataRelation dr = new DataRelation("FK_Grades_Students",
-                                                ds.Tables["Students"].Columns["StudentID"],
-                                                ds.Tables["Grades"].Columns["StudentID"]);
+            DataRelation dr = new DataRelation(relationName,
+                                                ds.Tables[parentTable].Columns[parentKey],
+                                                ds.Tables[childTable].Columns[childKey]);
             ds.Relations.Add(dr);
 
-            bsStudents = new BindingSource();
-            bsStudents.DataSource = ds;
-            bsStudents.DataMember = "Students";
+            bsParent = new BindingSource();
+            bsParent.DataSource = ds;
+            bsParent.DataMember = parentTable;
 
-            bsGrades = new BindingSource();
-            bsGrades.DataSource = bsStudents;
-            bsGrades.DataMember = "FK_Grades_Students";
+            bsChild = new BindingSource();
+            bsChild.DataSource = bsParent;
+            bsChild.DataMember = relationName;
 
-            dgvT1.DataSource = bsStudents;
-            dgvT2.DataSource = bsGrades;
+            dgvStudents.DataSource = bsParent;
+            dgvGrades.DataSource = bsChild;
+
         }
     }
 
