@@ -1,89 +1,105 @@
-USE Music_School
+USE MusicSchool
+GO
+
+-- drop tables in reverse dependency order (children first, parents last)
+IF OBJECT_ID('StudentLessons',          'U') IS NOT NULL DROP TABLE StudentLessons
+IF OBJECT_ID('Grades',                  'U') IS NOT NULL DROP TABLE Grades
+IF OBJECT_ID('Schedules',               'U') IS NOT NULL DROP TABLE Schedules
+IF OBJECT_ID('PerformanceParticipants', 'U') IS NOT NULL DROP TABLE PerformanceParticipants
+IF OBJECT_ID('Performances',            'U') IS NOT NULL DROP TABLE Performances
+IF OBJECT_ID('InstrumentRentals',       'U') IS NOT NULL DROP TABLE InstrumentRentals
+IF OBJECT_ID('Lessons',                 'U') IS NOT NULL DROP TABLE Lessons
+IF OBJECT_ID('Rooms',                   'U') IS NOT NULL DROP TABLE Rooms
+IF OBJECT_ID('Instruments',             'U') IS NOT NULL DROP TABLE Instruments
+IF OBJECT_ID('Students',                'U') IS NOT NULL DROP TABLE Students
+IF OBJECT_ID('Teachers',                'U') IS NOT NULL DROP TABLE Teachers
+GO
 
 CREATE TABLE Teachers (
-	TeacherID INT PRIMARY KEY IDENTITY(1,1),
-	FirstName VARCHAR(50),
-	LastName VARCHAR(50),
-	TeachingSubject VARCHAR(50)
-);
+    TeacherID       INT PRIMARY KEY IDENTITY(1,1),
+    FirstName       VARCHAR(50),
+    LastName        VARCHAR(50),
+    TeachingSubject VARCHAR(50)
+)
 
-CREATE TABLE Students(
-	StudentID INT PRIMARY KEY IDENTITY(1,1),
-	FirstName VARCHAR(50),
-	LastName VARCHAR(50),
-	BirthDate DATE
-);
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY IDENTITY(1,1),
+    FirstName VARCHAR(50),
+    LastName  VARCHAR(50),
+    BirthDate DATE
+)
 
 CREATE TABLE Instruments (
-	InstrumentID INT PRIMARY KEY IDENTITY(1,1),
-	InstrumentName VARCHAR(50),
-);
+    InstrumentID   INT PRIMARY KEY IDENTITY(1,1),
+    InstrumentName VARCHAR(50)
+)
 
 CREATE TABLE Rooms (
-	RoomID INT PRIMARY KEY IDENTITY(1,1),
-	RoomName VARCHAR(100),
-	Capacity INT
-);
+    RoomID   INT PRIMARY KEY IDENTITY(1,1),
+    RoomName VARCHAR(100),
+    Capacity INT
+)
 
 CREATE TABLE Lessons (
-	LessonID INT PRIMARY KEY IDENTITY(1,1),
-	LessonName VARCHAR(100),
-	TeacherID INT,
-	InstrumentID INT,
-	RoomID INT,
-	FOREIGN KEY (TeacherID) REFERENCES Teachers(TeacherID),
-	FOREIGN KEY (InstrumentID) REFERENCES Instruments(InstrumentID),
-	FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID)
-);
+    LessonID     INT PRIMARY KEY IDENTITY(1,1),
+    LessonName   VARCHAR(100) UNIQUE,
+    TeacherID    INT,
+    InstrumentID INT,
+    RoomID       INT,
+    FOREIGN KEY (TeacherID)    REFERENCES Teachers(TeacherID),
+    FOREIGN KEY (InstrumentID) REFERENCES Instruments(InstrumentID),
+    FOREIGN KEY (RoomID)       REFERENCES Rooms(RoomID)
+)
 
 CREATE TABLE InstrumentRentals (
-	RentalID INT PRIMARY KEY IDENTITY(1,1),
-	StartDate DATE,
-	EndDate DATE,
-	StudentID INT,
-	InstrumentID INT,
-	FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
-	FOREIGN KEY (InstrumentID) REFERENCES Instruments(InstrumentID)
-);
+    RentalID     INT PRIMARY KEY IDENTITY(1,1),
+    StartDate    DATE,
+    EndDate      DATE,
+    StudentID    INT,
+    InstrumentID INT,
+    FOREIGN KEY (StudentID)    REFERENCES Students(StudentID),
+    FOREIGN KEY (InstrumentID) REFERENCES Instruments(InstrumentID)
+)
 
 CREATE TABLE Performances (
-	PerformanceID INT PRIMARY KEY IDENTITY(1,1),
-	Title VARCHAR(100),
-	PerformanceDate DATE
-);
+    PerformanceID   INT PRIMARY KEY IDENTITY(1,1),
+    Title           VARCHAR(100),
+    PerformanceDate DATE
+)
 
 CREATE TABLE PerformanceParticipants (
-	PerformanceID INT,
-	StudentID INT,
-	Role VARCHAR(50),
-	PRIMARY KEY (PerformanceID, StudentID),
-	FOREIGN KEY (PerformanceID) REFERENCES Performances(PerformanceID),
-	FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
-);
+    PerformanceID INT,
+    StudentID     INT,
+    Role          VARCHAR(50),
+    PRIMARY KEY (PerformanceID, StudentID),
+    FOREIGN KEY (PerformanceID) REFERENCES Performances(PerformanceID),
+    FOREIGN KEY (StudentID)     REFERENCES Students(StudentID)
+)
 
 CREATE TABLE Schedules (
-	ScheduleID INT PRIMARY KEY IDENTITY(1,1),
-	LessonID INT,
-	DayOfWeek VARCHAR(50),
-	StartTime TIME,
-	EndTime TIME,
-	FOREIGN KEY (LessonID) REFERENCES Lessons(LessonID)
-);
+    ScheduleID INT PRIMARY KEY IDENTITY(1,1),
+    LessonID   INT,
+    DayOfWeek  VARCHAR(50),
+    StartTime  TIME,
+    EndTime    TIME,
+    FOREIGN KEY (LessonID) REFERENCES Lessons(LessonID)
+)
 
 CREATE TABLE Grades (
-	GradeID INT PRIMARY KEY IDENTITY(1,1),
-	StudentID INT,
-	LessonID INT,
-	GradeValue INT CHECK (GradeValue BETWEEN 1 AND 10),
-	FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
-	FOREIGN KEY (LessonID) REFERENCES Lessons(LessonID)
-);
+    GradeID    INT PRIMARY KEY IDENTITY(1,1),
+    StudentID  INT,
+    LessonID   INT,
+    GradeValue INT CHECK (GradeValue BETWEEN 1 AND 10),
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
+    FOREIGN KEY (LessonID)  REFERENCES Lessons(LessonID)
+)
 
 CREATE TABLE StudentLessons (
     StudentID INT,
-    LessonID INT,
-    Status VARCHAR(20),
+    LessonID  INT,
+    Status    VARCHAR(20),
     PRIMARY KEY (StudentID, LessonID),
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
-    FOREIGN KEY (LessonID) REFERENCES Lessons(LessonID)
-);
+    FOREIGN KEY (LessonID)  REFERENCES Lessons(LessonID)
+)
+GO
