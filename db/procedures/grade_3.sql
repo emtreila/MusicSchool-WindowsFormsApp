@@ -259,10 +259,10 @@ EXEC sp_EnrollStudentInLesson_FullRollback
     @roomName         = 'Room C',
     @status           = 'Active'
 
-SELECT * FROM Students       ORDER BY StudentID DESC
-SELECT * FROM Lessons        ORDER BY LessonID  DESC
+SELECT * FROM Students ORDER BY StudentID DESC
+SELECT * FROM Lessons ORDER BY LessonID DESC
 SELECT * FROM StudentLessons ORDER BY StudentID DESC
-SELECT * FROM Logs           ORDER BY LogID     DESC
+SELECT * FROM Logs ORDER BY LogID DESC
 
 -- 2. empty first name
 EXEC sp_EnrollStudentInLesson_FullRollback
@@ -274,7 +274,9 @@ EXEC sp_EnrollStudentInLesson_FullRollback
     @instrumentName   = NULL,
     @roomName         = 'Room C',
     @status           = 'Active'
-SELECT * FROM Logs           ORDER BY LogID     DESC
+
+SELECT * FROM Students ORDER BY StudentID DESC
+SELECT * FROM Logs ORDER BY LogID DESC
 
 -- 3. future birth date
 EXEC sp_EnrollStudentInLesson_FullRollback
@@ -286,7 +288,9 @@ EXEC sp_EnrollStudentInLesson_FullRollback
     @instrumentName   = NULL,
     @roomName         = 'Room C',
     @status           = 'Active'
-SELECT * FROM Logs           ORDER BY LogID     DESC
+
+SELECT * FROM Students ORDER BY StudentID DESC
+SELECT * FROM Logs ORDER BY LogID DESC
 
 -- 4. teacher not found
 EXEC sp_EnrollStudentInLesson_FullRollback
@@ -298,7 +302,9 @@ EXEC sp_EnrollStudentInLesson_FullRollback
     @instrumentName   = NULL,
     @roomName         = 'Room C',
     @status           = 'Active'
-SELECT * FROM Logs           ORDER BY LogID     DESC
+
+SELECT * FROM Lessons ORDER BY LessonID DESC
+SELECT * FROM Logs ORDER BY LogID DESC
 
 -- 5. invalid status
 EXEC sp_EnrollStudentInLesson_FullRollback
@@ -310,9 +316,13 @@ EXEC sp_EnrollStudentInLesson_FullRollback
     @instrumentName   = NULL,
     @roomName         = 'Room C',
     @status           = 'Pending'
-SELECT * FROM Logs           ORDER BY LogID     DESC
 
--- 6. rollback case: 'Jazz Fundamentals' already exists -> Bogdan should NOT appear in Students after this
+SELECT * FROM Students ORDER BY StudentID DESC
+SELECT * FROM Lessons ORDER BY LessonID DESC
+SELECT * FROM StudentLessons ORDER BY StudentID DESC
+SELECT * FROM Logs ORDER BY LogID DESC
+
+-- 6. 'Jazz Fundamentals' already exists -> Bogdan should NOT appear in Students after this
 EXEC sp_EnrollStudentInLesson_FullRollback
     @studentFirstName = 'Bogdan',
     @studentLastName  = 'Ionescu',
